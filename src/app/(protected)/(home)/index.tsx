@@ -12,7 +12,7 @@ export default function HomeScreen() {
     <PageView style={{ alignItems: "flex-start" }}>
       <Text>Hello there</Text>
 
-      <Link href="/(home)/third" push asChild>
+      <Link href="/(protected)/(home)/third" push asChild>
         <Button
           icon="ghost"
           mode="contained"
