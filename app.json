@@ -21,11 +21,16 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",
+      [
+        "expo-router",
+        {
+          "origin": "https://teammate.expo.app"
+        }
+      ],
       [
         "expo-splash-screen",
         {
