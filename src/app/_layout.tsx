@@ -19,7 +19,10 @@ export default function RootLayout() {
           />
           <Stack.Screen
             name="login"
-            options={{ headerTitle: "Login", animation: "none" }}
+            options={{
+              headerTitle: "Teammate",
+              animation: "none",
+            }}
           />
         </StackLayout>
       </AuthProvider>

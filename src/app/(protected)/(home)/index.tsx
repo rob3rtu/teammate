@@ -1,12 +1,10 @@
 import PageView from "@/layouts/PageView";
 import { Link } from "expo-router";
 import { useEffect, useState } from "react";
-import { Appearance } from "react-native";
 import { Button, List, Surface, Text, useTheme } from "react-native-paper";
 
 export default function HomeScreen() {
   const theme = useTheme();
-  const colorScheme = Appearance.getColorScheme();
   const [listItems, setListItems] = useState<string[]>([]);
 
   useEffect(() => {
@@ -36,8 +34,6 @@ export default function HomeScreen() {
       <Surface style={{ padding: 10 }}>
         <Text>Hello surface</Text>
       </Surface>
-
-      <Text>Color Scheme: {colorScheme}</Text>
 
       <List.Section>
         <List.Subheader>Items from GET</List.Subheader>

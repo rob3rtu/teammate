@@ -1,7 +1,15 @@
 import { ReactNode } from "react";
-import { StyleProp, View, ViewStyle } from "react-native";
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleProp,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  ViewStyle,
+} from "react-native";
 import { useTheme } from "react-native-paper";
-import { StyleSheet } from "react-native";
 
 interface PageViewProps {
   children: ReactNode;
@@ -13,17 +21,26 @@ export default function PageView(props: PageViewProps) {
   const { children, style } = props;
 
   return (
-    <View
-      style={{
-        gap: 10,
-        padding: 12,
-        flex: 1,
-        alignItems: "center",
-        backgroundColor: theme.colors.background,
-        ...(StyleSheet.flatten(style) || {}),
-      }}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      {children}
-    </View>
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <ScrollView
+          contentContainerStyle={[
+            {
+              flexGrow: 1,
+              padding: 12,
+              gap: 10,
+              backgroundColor: theme.colors.background,
+            },
+            StyleSheet.flatten(style),
+          ]}
+          keyboardShouldPersistTaps="handled"
+        >
+          {children}
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
