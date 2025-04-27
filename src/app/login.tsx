@@ -1,9 +1,9 @@
 import PageView from "@/layouts/PageView";
-import { AuthContext } from "@/utils/authContext";
+import { supabase } from "@/utils/supabase";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { View } from "react-native";
+import { Alert, View } from "react-native";
 import {
   Button,
   HelperText,
@@ -13,35 +13,81 @@ import {
 } from "react-native-paper";
 import { z } from "zod";
 
-const loginSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
-});
-type LoginShemaType = z.infer<typeof loginSchema>;
+const loginSchema = z
+  .object({
+    fullName: z.string().optional(),
+    email: z.string().email({ message: "Invalid email address" }),
+    password: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters" }),
+    isCreatingAccount: z.boolean(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.isCreatingAccount && (data.fullName?.length ?? 0) < 3) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Full Name must be at least 3 characters",
+        path: ["fullName"],
+      });
+    }
+  });
+
+type LoginSchemaType = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const [isPasswordHidden, setIsPasswordHidden] = useState<boolean>(true);
-  const [isCreatingAccount, setIsCreatingAccount] = useState<boolean>(true);
-
-  const authContext = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginShemaType>({
+    watch,
+    setValue,
+  } = useForm<LoginSchemaType>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
+      fullName: "",
       email: "",
       password: "",
+      isCreatingAccount: false,
     },
   });
 
-  const onSubmit = handleSubmit((data) => {
-    console.log(data);
-  });
+  const isCreatingAccount = watch("isCreatingAccount");
+
+  const onSubmit = handleSubmit(
+    async (data) => {
+      setIsLoading(true);
+      if (isCreatingAccount) {
+        //signn up
+
+        const { error } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password,
+          options: {
+            data: {
+              fullName: data.fullName,
+            },
+          },
+        });
+
+        if (error) Alert.alert(error.message);
+      } else {
+        //sign in
+
+        const { error } = await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
+        });
+
+        if (error) Alert.alert(error.message);
+      }
+
+      setIsLoading(false);
+    },
+    (errors) => console.log(errors)
+  );
 
   return (
     <PageView style={{ padding: 20, paddingTop: 100 }}>
@@ -51,6 +97,30 @@ export default function Login() {
         </Text>
 
         <View>
+          {isCreatingAccount && (
+            <View>
+              <Controller
+                control={control}
+                name="fullName"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    autoCapitalize="none"
+                    label="Full Name"
+                    mode="outlined"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    error={!!errors.fullName}
+                    theme={{ roundness: 12 }}
+                  />
+                )}
+              />
+              <HelperText type="error" visible={!!errors.fullName}>
+                {errors.fullName?.message}
+              </HelperText>
+            </View>
+          )}
+
           <View>
             <Controller
               control={control}
@@ -64,6 +134,7 @@ export default function Login() {
                   onChangeText={onChange}
                   value={value}
                   error={!!errors.email}
+                  theme={{ roundness: 12 }}
                 />
               )}
             />
@@ -86,9 +157,10 @@ export default function Login() {
                   value={value}
                   error={!!errors.password}
                   secureTextEntry={isPasswordHidden}
+                  theme={{ roundness: 12 }}
                   right={
                     <TextInput.Icon
-                      icon={isPasswordHidden ? "eye" : "eye-off"}
+                      icon={isPasswordHidden ? "eye-off" : "eye"}
                       onPress={() => setIsPasswordHidden(!isPasswordHidden)}
                     />
                   }
@@ -102,7 +174,7 @@ export default function Login() {
         </View>
 
         <View style={{ gap: 10 }}>
-          <Button onPress={onSubmit} mode="contained">
+          <Button onPress={onSubmit} mode="contained" loading={isLoading}>
             {isCreatingAccount ? "Create account" : "Log in"}
           </Button>
 
@@ -110,7 +182,7 @@ export default function Login() {
             mode="text"
             labelStyle={{ textDecorationLine: "underline" }}
             onPress={() => {
-              setIsCreatingAccount(!isCreatingAccount);
+              setValue("isCreatingAccount", !isCreatingAccount);
             }}
           >
             {isCreatingAccount

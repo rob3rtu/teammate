@@ -6,13 +6,13 @@ import { useContext } from "react";
 import "react-native-reanimated";
 
 export default function ProtectedLayout() {
-  const { isLoggedIn, isReady } = useContext(AuthContext);
+  const { session, isReady } = useContext(AuthContext);
 
   if (!isReady) {
     return null;
   }
 
-  if (!isLoggedIn) {
+  if (!session || !session.user) {
     return <Redirect href="/login" />;
   }
 

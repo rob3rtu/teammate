@@ -1,67 +1,33 @@
-import { SplashScreen, useRouter } from "expo-router";
+import { Session } from "@supabase/supabase-js";
+import { SplashScreen } from "expo-router";
 import { createContext, PropsWithChildren, useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { supabase } from "./supabase";
 
 SplashScreen.preventAutoHideAsync();
 
-interface AuthState {
-  isLoggedIn: boolean;
+interface AuthContextType {
   isReady: boolean;
-  logIn: () => void;
-  logOut: () => void;
+  session: Session | null;
+  // setSession: React.Dispatch<React.SetStateAction<Session | null>>
 }
 
-const authStorageKey = "auth-key";
-
-export const AuthContext = createContext<AuthState>({
-  isLoggedIn: false,
+export const AuthContext = createContext<AuthContextType>({
   isReady: false,
-  logIn: () => {},
-  logOut: () => {},
+  session: null,
 });
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [isReady, setIsReady] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const router = useRouter();
-
-  const updateAuthState = async (newState: { isLoggedIn: boolean }) => {
-    try {
-      const jsonValue = JSON.stringify(newState);
-      await AsyncStorage.setItem(authStorageKey, jsonValue);
-    } catch (error) {
-      console.error("Error saving AUTH state", error);
-    }
-  };
-
-  const logIn = () => {
-    setIsLoggedIn(true);
-    updateAuthState({ isLoggedIn: true });
-    router.replace("/");
-  };
-
-  const logOut = () => {
-    setIsLoggedIn(false);
-    updateAuthState({ isLoggedIn: false });
-    router.replace("/login");
-  };
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    const getAuthFromStorage = async () => {
-      await new Promise((res) => setTimeout(() => res(null), 2000));
-      try {
-        const value = await AsyncStorage.getItem(authStorageKey);
-        if (value !== null) {
-          const authState = JSON.parse(value);
-          setIsLoggedIn(authState.isLoggedIn);
-        }
-      } catch (error) {
-        console.error("Error getting AUTH state", error);
-      }
-      setIsReady(true);
-    };
-
-    getAuthFromStorage();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    setIsReady(true);
   }, []);
 
   useEffect(() => {
@@ -71,7 +37,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, [isReady]);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, logIn, logOut, isReady }}>
+    <AuthContext.Provider value={{ session, isReady }}>
       {children}
     </AuthContext.Provider>
   );
