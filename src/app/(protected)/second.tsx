@@ -1,15 +1,25 @@
 import PageView from "@/layouts/PageView";
-import { AuthContext } from "@/utils/authContext";
-import { useContext } from "react";
+import { supabase } from "@/utils/supabase";
+import { useMutation } from "@tanstack/react-query";
+import { Alert } from "react-native";
 import { Button, Text } from "react-native-paper";
 
 export default function SecondScreen() {
-  const authContext = useContext(AuthContext);
+  const logOutMutation = useMutation({
+    mutationFn: async () => {
+      await supabase.auth.signOut();
+    },
+    onError: (error) => Alert.alert(error.message),
+  });
 
   return (
     <PageView>
       <Text>Second screen</Text>
-      <Button mode="outlined" onPress={authContext.logOut}>
+      <Button
+        mode="contained"
+        onPress={() => logOutMutation.mutateAsync()}
+        loading={logOutMutation.isPending}
+      >
         Log out
       </Button>
     </PageView>

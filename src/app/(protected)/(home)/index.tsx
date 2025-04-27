@@ -1,25 +1,16 @@
 import PageView from "@/layouts/PageView";
+import { AuthContext } from "@/utils/authContext";
 import { Link } from "expo-router";
-import { useEffect, useState } from "react";
-import { Button, List, Surface, Text, useTheme } from "react-native-paper";
+import { useContext } from "react";
+import { Button, Surface, Text, useTheme } from "react-native-paper";
 
 export default function HomeScreen() {
   const theme = useTheme();
-  const [listItems, setListItems] = useState<string[]>([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch("/api/persons");
-      const data = await response.json();
-      setListItems(data);
-    };
-
-    fetchData();
-  }, []);
+  const { authenticatedAccount } = useContext(AuthContext);
 
   return (
     <PageView style={{ alignItems: "flex-start" }}>
-      <Text>Hello there</Text>
+      <Text>Hello there, {authenticatedAccount?.fullName}</Text>
 
       <Link href="/(protected)/(home)/third" push asChild>
         <Button
@@ -34,13 +25,6 @@ export default function HomeScreen() {
       <Surface style={{ padding: 10 }}>
         <Text>Hello surface</Text>
       </Surface>
-
-      <List.Section>
-        <List.Subheader>Items from GET</List.Subheader>
-        {listItems.map((item) => (
-          <List.Item key={item} title={item} />
-        ))}
-      </List.Section>
     </PageView>
   );
 }
