@@ -15,24 +15,13 @@ import {
 } from "react-native-paper";
 import { z } from "zod";
 
-const loginSchema = z
-  .object({
-    fullName: z.string().optional(),
-    email: z.string().email({ message: "Invalid email address" }),
-    password: z
-      .string()
-      .min(6, { message: "Password must be at least 6 characters" }),
-    isCreatingAccount: z.boolean(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.isCreatingAccount && (data.fullName?.length ?? 0) < 3) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Full Name must be at least 3 characters",
-        path: ["fullName"],
-      });
-    }
-  });
+const loginSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters" }),
+  isCreatingAccount: z.boolean(),
+});
 
 type LoginSchemaType = z.infer<typeof loginSchema>;
 
@@ -51,7 +40,6 @@ export default function Login() {
   } = useForm<LoginSchemaType>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      fullName: "",
       email: "",
       password: "",
       isCreatingAccount: false,
@@ -72,11 +60,6 @@ export default function Login() {
         const { error } = await supabase.auth.signUp({
           email: data.email,
           password: data.password,
-          options: {
-            data: {
-              fullName: data.fullName,
-            },
-          },
         });
 
         if (error) Alert.alert(error.message);
@@ -104,30 +87,6 @@ export default function Login() {
         </Text>
 
         <View>
-          {isCreatingAccount && (
-            <View>
-              <Controller
-                control={control}
-                name="fullName"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    autoCapitalize="none"
-                    label="Full Name"
-                    mode="outlined"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    error={!!errors.fullName}
-                    theme={{ roundness: 12 }}
-                  />
-                )}
-              />
-              <HelperText type="error" visible={!!errors.fullName}>
-                {errors.fullName?.message}
-              </HelperText>
-            </View>
-          )}
-
           <View>
             <Controller
               control={control}
