@@ -1,12 +1,13 @@
+import StackLayout from "@/layouts/StackLayout";
 import TabsLayout from "@/layouts/TabsLayout";
 import { AuthContext } from "@/utils/authContext";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Redirect, Tabs } from "expo-router";
+import { Redirect, Stack, Tabs } from "expo-router";
 import { useContext } from "react";
 import "react-native-reanimated";
 
 export default function ProtectedLayout() {
-  const { session, isReady } = useContext(AuthContext);
+  const { session, isReady, authenticatedAccount } = useContext(AuthContext);
 
   if (!isReady) {
     return null;
@@ -14,6 +15,19 @@ export default function ProtectedLayout() {
 
   if (!session || !session.user) {
     return <Redirect href="/login" />;
+  }
+
+  if (!authenticatedAccount?.setup) {
+    return (
+      <StackLayout>
+        <Stack.Screen
+          name="setup"
+          options={{
+            headerTitle: "Profile Setup",
+          }}
+        />
+      </StackLayout>
+    );
   }
 
   return (
