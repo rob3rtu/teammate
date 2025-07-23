@@ -8,7 +8,7 @@ export interface UserProfile {
   setup: boolean;
 }
 
-enum PlayerLevelEnum {
+export enum PlayerLevelEnum {
   Beginner = "beginner",
   Intermediate = "intermediate",
   Advanced = "advanced",
