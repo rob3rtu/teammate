@@ -2,12 +2,21 @@ import PageView from "@/layouts/PageView";
 import { PlayerLevelEnum } from "@/types/auth";
 import { AuthContext } from "@/utils/authContext";
 import { supabase } from "@/utils/supabase";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useContext } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, View } from "react-native";
-import { Button, HelperText, Text, TextInput } from "react-native-paper";
+import {
+  Button,
+  HelperText,
+  Surface,
+  Text,
+  TextInput,
+  TouchableRipple,
+  useTheme,
+} from "react-native-paper";
 import { z } from "zod";
 
 const setupSchema = z.object({
@@ -21,9 +30,12 @@ type SetupSchemaType = z.infer<typeof setupSchema>;
 
 export default function Setup() {
   const { authenticatedAccount } = useContext(AuthContext);
+  const theme = useTheme();
   const {
     control,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm<SetupSchemaType>({
     resolver: zodResolver(setupSchema),
     defaultValues: {
@@ -33,6 +45,7 @@ export default function Setup() {
       avatarUrl: "",
     },
   });
+  const selectedLevel = watch("level");
 
   const handleFinishSetup = useMutation({
     mutationFn: async () => {
@@ -51,24 +64,13 @@ export default function Setup() {
 
   return (
     <PageView style={{ justifyContent: "space-between" }}>
-      <Text
-        style={{
-          fontSize: 16,
-          textAlign: "center",
-        }}
-      >
-        Let's get to know you better
-      </Text>
-
       <View
         style={{
-          flexDirection: "row",
           alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
+          justifyContent: "center",
         }}
       >
-        <View style={{ flex: 1 }}>
+        <View style={{ width: "100%" }}>
           <Controller
             control={control}
             name="firstName"
@@ -89,7 +91,7 @@ export default function Setup() {
             {errors.firstName?.message}
           </HelperText>
         </View>
-        <View style={{ flex: 1 }}>
+        <View style={{ width: "100%" }}>
           <Controller
             control={control}
             name="lastName"
@@ -112,12 +114,65 @@ export default function Setup() {
         </View>
       </View>
 
+      <View style={{ gap: 12 }}>
+        <Text style={{ textAlign: "left", fontSize: 18, fontWeight: 500 }}>
+          Level
+        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+        >
+          {Object.keys(PlayerLevelEnum).map((level, index) => (
+            <TouchableRipple
+              key={level}
+              style={{ width: "30%" }}
+              onPress={() => {
+                setValue(
+                  "level",
+                  PlayerLevelEnum[level as keyof typeof PlayerLevelEnum]
+                );
+              }}
+            >
+              <Surface
+                elevation={
+                  PlayerLevelEnum[level as keyof typeof PlayerLevelEnum] ===
+                  selectedLevel
+                    ? 5
+                    : 0
+                }
+                style={{
+                  padding: 8,
+                  borderRadius: 6,
+                  gap: 6,
+                  alignItems: "center",
+                }}
+              >
+                <Text>{level}</Text>
+                <View style={{ flexDirection: "row" }}>
+                  {Array.from(Array(index + 1).keys()).map((i) => (
+                    <MaterialCommunityIcons
+                      key={i}
+                      name="tennis-ball"
+                      color="green"
+                    />
+                  ))}
+                </View>
+              </Surface>
+            </TouchableRipple>
+          ))}
+        </View>
+      </View>
+
       <Button
         mode="contained"
         onPress={() => handleFinishSetup.mutateAsync()}
         loading={handleFinishSetup.isPending}
       >
-        Finish
+        Let's play
       </Button>
     </PageView>
   );

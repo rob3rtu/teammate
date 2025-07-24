@@ -17,13 +17,13 @@ export default function ProtectedLayout() {
     return <Redirect href="/login" />;
   }
 
-  if (!authenticatedAccount?.setup) {
+  if (authenticatedAccount?.setup === false) {
     return (
       <StackLayout>
         <Stack.Screen
           name="setup"
           options={{
-            headerTitle: "Profile Setup",
+            headerTitle: "Let's get to know you better",
           }}
         />
       </StackLayout>

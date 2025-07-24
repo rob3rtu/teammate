@@ -24,9 +24,7 @@ export default function HomeScreen() {
 
   return (
     <PageView style={{ alignItems: "flex-start" }}>
-      <Text>
-        Hello there, {authenticatedAccount?.firstName ?? "General Kenobi"}
-      </Text>
+      <Text>Hello there, {authenticatedAccount?.id ?? "General Kenobi"}</Text>
 
       <Link href="/(protected)/(home)/third" push asChild>
         <Button
