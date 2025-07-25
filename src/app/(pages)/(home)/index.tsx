@@ -1,5 +1,5 @@
+import { AuthContext } from "@/app/_layout";
 import PageView from "@/layouts/PageView";
-import { AuthContext } from "@/utils/authContext";
 import { supabase } from "@/utils/supabase";
 import { Link } from "expo-router";
 import { useContext } from "react";
@@ -26,7 +26,7 @@ export default function HomeScreen() {
     <PageView style={{ alignItems: "flex-start" }}>
       <Text>Hello there, {authenticatedAccount?.id ?? "General Kenobi"}</Text>
 
-      <Link href="/(protected)/(home)/third" push asChild>
+      <Link href="/(pages)/(home)/third" push asChild>
         <Button
           icon="ghost"
           mode="contained"

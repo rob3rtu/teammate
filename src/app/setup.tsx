@@ -1,6 +1,5 @@
 import PageView from "@/layouts/PageView";
 import { PlayerLevelEnum } from "@/types/auth";
-import { AuthContext } from "@/utils/authContext";
 import { supabase } from "@/utils/supabase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,9 +14,9 @@ import {
   Text,
   TextInput,
   TouchableRipple,
-  useTheme,
 } from "react-native-paper";
 import { z } from "zod";
+import { AuthContext } from "./_layout";
 
 const setupSchema = z.object({
   firstName: z.string().min(3, "First name must have at least 3 characters"),
@@ -30,7 +29,6 @@ type SetupSchemaType = z.infer<typeof setupSchema>;
 
 export default function Setup() {
   const { authenticatedAccount } = useContext(AuthContext);
-  const theme = useTheme();
   const {
     control,
     formState: { errors },

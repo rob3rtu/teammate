@@ -1,9 +1,8 @@
 import PageView from "@/layouts/PageView";
-import { AuthContext } from "@/utils/authContext";
 import { supabase } from "@/utils/supabase";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { useContext, useEffect, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, View } from "react-native";
 import {
@@ -26,7 +25,6 @@ const loginSchema = z.object({
 type LoginSchemaType = z.infer<typeof loginSchema>;
 
 export default function Login() {
-  const { session } = useContext(AuthContext);
   const router = useRouter();
   const [isPasswordHidden, setIsPasswordHidden] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -46,10 +44,6 @@ export default function Login() {
     },
   });
   const isCreatingAccount = watch("isCreatingAccount");
-
-  useEffect(() => {
-    if (session && session.user) router.replace("/");
-  }, [session]);
 
   const onSubmit = handleSubmit(
     async (data) => {

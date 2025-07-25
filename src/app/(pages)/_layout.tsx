@@ -1,35 +1,9 @@
-import StackLayout from "@/layouts/StackLayout";
 import TabsLayout from "@/layouts/TabsLayout";
-import { AuthContext } from "@/utils/authContext";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Redirect, Stack, Tabs } from "expo-router";
-import { useContext } from "react";
+import { Tabs } from "expo-router";
 import "react-native-reanimated";
 
 export default function ProtectedLayout() {
-  const { session, isReady, authenticatedAccount } = useContext(AuthContext);
-
-  if (!isReady) {
-    return null;
-  }
-
-  if (!session || !session.user) {
-    return <Redirect href="/login" />;
-  }
-
-  if (authenticatedAccount?.setup === false) {
-    return (
-      <StackLayout>
-        <Stack.Screen
-          name="setup"
-          options={{
-            headerTitle: "Let's get to know you better",
-          }}
-        />
-      </StackLayout>
-    );
-  }
-
   return (
     <TabsLayout>
       <Tabs.Screen
