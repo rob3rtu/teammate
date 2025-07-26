@@ -40,6 +40,12 @@
           "backgroundColor": "#ffffff"
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you set a profile image."
+        }
+      ],
       "expo-font",
       "expo-web-browser"
     ],
