@@ -8,6 +8,7 @@ import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/utils/supabase";
 import { UserProfile } from "@/types/auth";
 import * as SplashScreen from "expo-splash-screen";
+import { ActivityIndicator, View, Image } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -35,6 +36,7 @@ export default function RootLayout() {
       setSession(session);
 
       supabase.auth.onAuthStateChange((_event, session) => {
+        setIsAppReady(false);
         setSession(session);
       });
     };
@@ -44,6 +46,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      setIsAppReady(false);
       if (session?.user) {
         const { data } = await supabase
           .from("profiles")
@@ -52,7 +55,6 @@ export default function RootLayout() {
           .single();
         setAuthenticatedAccount(data);
       } else {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
         setIsAppReady(true);
         await SplashScreen.hideAsync();
       }
@@ -64,7 +66,6 @@ export default function RootLayout() {
   useEffect(() => {
     const setuser = async () => {
       if (authenticatedAccount) {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
         setIsAppReady(true);
         SplashScreen.hideAsync();
       }
@@ -74,7 +75,26 @@ export default function RootLayout() {
   }, [authenticatedAccount]);
 
   if (!isAppReady) {
-    return null;
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#fff",
+        }}
+      >
+        <Image
+          source={require("../../assets/images/react-logo.png")}
+          style={{ width: 100, height: 100 }}
+        />
+        <ActivityIndicator
+          size="large"
+          color="#000"
+          style={{ marginTop: 20 }}
+        />
+      </View>
+    );
   }
 
   return (
