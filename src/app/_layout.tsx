@@ -3,10 +3,13 @@ import ThemeProvider from "@/theme/ThemeProvider";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/utils/supabase";
 import { UserProfile } from "@/types/auth";
+import * as SplashScreen from "expo-splash-screen";
+
+SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
@@ -19,31 +22,60 @@ export const AuthContext = createContext<AuthContextType>({
 });
 
 export default function RootLayout() {
+  const [isAppReady, setIsAppReady] = useState<boolean>(false);
   const [authenticatedAccount, setAuthenticatedAccount] =
     useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const loadResources = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       setSession(session);
-    });
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+
+      supabase.auth.onAuthStateChange((_event, session) => {
+        setSession(session);
+      });
+    };
+
+    loadResources();
   }, []);
 
   useEffect(() => {
-    if (session?.user) {
-      supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session.user.id)
-        .single()
-        .then(({ data }) => {
-          setAuthenticatedAccount(data);
-        });
-    }
+    const fetchProfile = async () => {
+      if (session?.user) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+        setAuthenticatedAccount(data);
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        setIsAppReady(true);
+        await SplashScreen.hideAsync();
+      }
+    };
+
+    fetchProfile();
   }, [session]);
+
+  useEffect(() => {
+    const setuser = async () => {
+      if (authenticatedAccount) {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        setIsAppReady(true);
+        SplashScreen.hideAsync();
+      }
+    };
+
+    setuser();
+  }, [authenticatedAccount]);
+
+  if (!isAppReady) {
+    return null;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

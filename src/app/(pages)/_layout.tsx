@@ -7,13 +7,21 @@ export default function ProtectedLayout() {
   return (
     <TabsLayout>
       <Tabs.Screen
-        name="(home)"
+        name="(timeline)/index"
         options={{
-          title: "Home",
-          headerShown: false,
+          title: "Timeline",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="tennis" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="(courts)/index"
+        options={{
+          title: "Courts",
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
-              name="home-variant"
+              name="map-search-outline"
               size={size}
               color={color}
             />
@@ -21,11 +29,15 @@ export default function ProtectedLayout() {
         }}
       />
       <Tabs.Screen
-        name="second"
+        name="(profile)/index"
         options={{
-          title: "Airplane",
+          title: "Profile",
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="airplane" size={size} color={color} />
+            <MaterialCommunityIcons
+              name="account-circle-outline"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />

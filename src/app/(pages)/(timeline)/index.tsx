@@ -1,13 +1,11 @@
 import { AuthContext } from "@/app/_layout";
 import PageView from "@/layouts/PageView";
 import { supabase } from "@/utils/supabase";
-import { Link } from "expo-router";
 import { useContext } from "react";
 import { Alert } from "react-native";
-import { Button, Surface, Text, useTheme } from "react-native-paper";
+import { Button, Surface, Text } from "react-native-paper";
 
 export default function HomeScreen() {
-  const theme = useTheme();
   const { authenticatedAccount } = useContext(AuthContext);
 
   const handleResetSetup = async () => {
@@ -27,16 +25,6 @@ export default function HomeScreen() {
       <Text>
         Hello there, {authenticatedAccount?.firstName ?? "General Kenobi"}
       </Text>
-
-      <Link href="/(pages)/(home)/third" push asChild>
-        <Button
-          icon="ghost"
-          mode="contained"
-          buttonColor={theme.colors.tertiary}
-        >
-          Go to third
-        </Button>
-      </Link>
 
       <Surface style={{ padding: 10 }}>
         <Text>Hello surface</Text>

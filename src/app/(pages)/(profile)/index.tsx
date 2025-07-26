@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Alert } from "react-native";
 import { Button, Text } from "react-native-paper";
 
-export default function SecondScreen() {
+export default function Profile() {
   const logOutMutation = useMutation({
     mutationFn: async () => {
       await supabase.auth.signOut();
@@ -14,7 +14,7 @@ export default function SecondScreen() {
 
   return (
     <PageView>
-      <Text>Second screen</Text>
+      <Text>Profile page</Text>
       <Button
         mode="contained"
         onPress={() => logOutMutation.mutateAsync()}
