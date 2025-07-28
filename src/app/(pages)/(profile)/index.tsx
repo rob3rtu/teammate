@@ -1,22 +1,13 @@
 import { AuthContext } from "@/app/_layout";
 import PageView from "@/layouts/PageView";
-import { supabase } from "@/utils/supabase";
 import { capitalise } from "@/utils/utilityFunctions";
-import { useMutation } from "@tanstack/react-query";
 import { Link } from "expo-router";
 import { useContext } from "react";
-import { Alert, View, Image } from "react-native";
-import { Avatar, Button, IconButton, Text } from "react-native-paper";
+import { Image, View } from "react-native";
+import { Avatar, IconButton, Text } from "react-native-paper";
 
 export default function Profile() {
   const { authenticatedAccount } = useContext(AuthContext);
-
-  const logOutMutation = useMutation({
-    mutationFn: async () => {
-      await supabase.auth.signOut();
-    },
-    onError: (error) => Alert.alert(error.message),
-  });
 
   if (!authenticatedAccount) {
     return (
@@ -66,14 +57,6 @@ export default function Profile() {
           )}`}
         </Text>
       </View>
-
-      <Button
-        mode="contained"
-        onPress={() => logOutMutation.mutateAsync()}
-        loading={logOutMutation.isPending}
-      >
-        Log out
-      </Button>
     </PageView>
   );
 }

@@ -31,10 +31,26 @@ export default function ProtectedLayout() {
       <Tabs.Screen
         name="(profile)"
         options={{
+          title: "Profile",
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="account-circle-outline"
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="(settings)"
+        options={{
+          title: "Settings",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons
+              name="cog-outline"
               size={size}
               color={color}
             />
