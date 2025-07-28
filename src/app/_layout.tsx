@@ -3,7 +3,7 @@ import ThemeProvider from "@/theme/ThemeProvider";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createContext, useCallback, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/utils/supabase";
 import { UserProfile } from "@/types/auth";
@@ -16,10 +16,12 @@ const queryClient = new QueryClient();
 
 interface AuthContextType {
   authenticatedAccount: UserProfile | null;
+  setAuthenticatedAccount: (u: UserProfile | null) => void;
 }
 
 export const AuthContext = createContext<AuthContextType>({
   authenticatedAccount: null,
+  setAuthenticatedAccount: () => {},
 });
 
 export default function RootLayout() {
@@ -100,7 +102,9 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthContext.Provider value={{ authenticatedAccount }}>
+        <AuthContext.Provider
+          value={{ authenticatedAccount, setAuthenticatedAccount }}
+        >
           <StatusBar style="auto" />
           <StackLayout>
             <Stack.Protected guard={!!session && !!authenticatedAccount?.setup}>

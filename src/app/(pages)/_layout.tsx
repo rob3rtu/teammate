@@ -29,9 +29,9 @@ export default function ProtectedLayout() {
         }}
       />
       <Tabs.Screen
-        name="(profile)/index"
+        name="(profile)"
         options={{
-          title: "Profile",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="account-circle-outline"

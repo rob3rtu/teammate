@@ -1,10 +1,10 @@
 export interface UserProfile {
   id: string;
   email: string;
-  firstName: string | null;
-  lastName: string | null;
+  firstName: string;
+  lastName: string;
   avatarUrl: string | null;
-  level: PlayerLevelEnum | null;
+  level: PlayerLevelEnum;
   setup: boolean;
 }
 
