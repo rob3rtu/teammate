@@ -10,24 +10,15 @@ import { Alert, Image, Pressable, View } from "react-native";
 import {
   Avatar,
   Button,
+  Chip,
   HelperText,
-  Surface,
   Text,
   TextInput,
-  TouchableRipple,
 } from "react-native-paper";
-import { z } from "zod";
 import { AuthContext } from "./_layout";
 import * as ImagePicker from "expo-image-picker";
-
-const setupSchema = z.object({
-  firstName: z.string().min(3, "First name must have at least 3 characters"),
-  lastName: z.string().min(3, "First name must have at least 3 characters"),
-  level: z.nativeEnum(PlayerLevelEnum),
-  avatarUrl: z.string(),
-});
-
-type SetupSchemaType = z.infer<typeof setupSchema>;
+import { profileSchema, ProfileSchemaType } from "@/types/profile";
+import LevelChip from "@/components/LevelChip";
 
 export default function Setup() {
   const { authenticatedAccount } = useContext(AuthContext);
@@ -37,8 +28,8 @@ export default function Setup() {
     setValue,
     watch,
     handleSubmit,
-  } = useForm<SetupSchemaType>({
-    resolver: zodResolver(setupSchema),
+  } = useForm<ProfileSchemaType>({
+    resolver: zodResolver(profileSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -50,7 +41,7 @@ export default function Setup() {
   const avatarUrl = watch("avatarUrl");
 
   const handleFinishSetup = useMutation({
-    mutationFn: async (formData: SetupSchemaType) => {
+    mutationFn: async (formData: ProfileSchemaType) => {
       await supabase
         .from("profiles")
         .update({ ...formData, setup: true })
@@ -176,43 +167,17 @@ export default function Setup() {
               width: "100%",
             }}
           >
-            {Object.keys(PlayerLevelEnum).map((level, index) => (
-              <TouchableRipple
+            {(
+              Object.keys(PlayerLevelEnum) as (keyof typeof PlayerLevelEnum)[]
+            ).map((level) => (
+              <LevelChip
                 key={level}
-                style={{ width: "30%" }}
+                level={PlayerLevelEnum[level]}
+                isSelected={selectedLevel === PlayerLevelEnum[level]}
                 onPress={() => {
-                  setValue(
-                    "level",
-                    PlayerLevelEnum[level as keyof typeof PlayerLevelEnum]
-                  );
+                  setValue("level", PlayerLevelEnum[level]);
                 }}
-              >
-                <Surface
-                  elevation={
-                    PlayerLevelEnum[level as keyof typeof PlayerLevelEnum] ===
-                    selectedLevel
-                      ? 5
-                      : 0
-                  }
-                  style={{
-                    padding: 8,
-                    borderRadius: 6,
-                    gap: 6,
-                    alignItems: "center",
-                  }}
-                >
-                  <Text>{level}</Text>
-                  <View style={{ flexDirection: "row" }}>
-                    {Array.from(Array(index + 1).keys()).map((i) => (
-                      <MaterialCommunityIcons
-                        key={i}
-                        name="tennis-ball"
-                        color="green"
-                      />
-                    ))}
-                  </View>
-                </Surface>
-              </TouchableRipple>
+              />
             ))}
           </View>
         </View>

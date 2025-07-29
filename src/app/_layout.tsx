@@ -9,6 +9,7 @@ import { supabase } from "@/utils/supabase";
 import { UserProfile } from "@/types/auth";
 import * as SplashScreen from "expo-splash-screen";
 import { ActivityIndicator, View, Image } from "react-native";
+import Toast from "react-native-toast-message";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -135,6 +136,7 @@ export default function RootLayout() {
               />
             </Stack.Protected>
           </StackLayout>
+          <Toast />
         </AuthContext.Provider>
       </ThemeProvider>
     </QueryClientProvider>

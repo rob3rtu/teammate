@@ -1,4 +1,5 @@
 import { AuthContext } from "@/app/_layout";
+import LevelChip from "@/components/LevelChip";
 import PageView from "@/layouts/PageView";
 import { capitalise } from "@/utils/utilityFunctions";
 import { Link } from "expo-router";
@@ -18,7 +19,7 @@ export default function Profile() {
   }
 
   return (
-    <PageView style={{ gap: 24 }}>
+    <PageView style={{ gap: 24, alignItems: "center" }}>
       <Link href="/(pages)/(profile)/edit" push asChild>
         <IconButton
           icon="account-edit-outline"
@@ -57,6 +58,8 @@ export default function Profile() {
           )}`}
         </Text>
       </View>
+
+      <LevelChip level={authenticatedAccount.level} isSelected={true} />
     </PageView>
   );
 }

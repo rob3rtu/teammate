@@ -13,3 +13,9 @@ export enum PlayerLevelEnum {
   Intermediate = "intermediate",
   Advanced = "advanced",
 }
+
+export const LevelIndex = {
+  [PlayerLevelEnum.Beginner]: 1,
+  [PlayerLevelEnum.Intermediate]: 2,
+  [PlayerLevelEnum.Advanced]: 3,
+};
