@@ -1,16 +1,14 @@
 import PageView from "@/layouts/PageView";
 import { PlayerLevelEnum } from "@/types/auth";
 import { supabase } from "@/utils/supabase";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, Image, Pressable, View } from "react-native";
 import {
   Avatar,
   Button,
-  Chip,
   HelperText,
   Text,
   TextInput,
@@ -19,9 +17,13 @@ import { AuthContext } from "./_layout";
 import * as ImagePicker from "expo-image-picker";
 import { profileSchema, ProfileSchemaType } from "@/types/profile";
 import LevelChip from "@/components/LevelChip";
+import { uploadAvatar } from "@/utils/utilityFunctions";
 
 export default function Setup() {
   const { authenticatedAccount } = useContext(AuthContext);
+  const [avatar, setAvatar] = useState<
+    ImagePicker.ImagePickerAsset | undefined
+  >(undefined);
   const {
     control,
     formState: { errors },
@@ -42,9 +44,15 @@ export default function Setup() {
 
   const handleFinishSetup = useMutation({
     mutationFn: async (formData: ProfileSchemaType) => {
+      let avatarPath: string = "";
+
+      if (avatar) {
+        avatarPath = await uploadAvatar(avatar, authenticatedAccount!.id);
+      }
+
       await supabase
         .from("profiles")
-        .update({ ...formData, setup: true })
+        .update({ ...formData, avatarUrl: avatarPath, setup: true })
         .eq("id", authenticatedAccount?.id);
     },
     onSuccess: () => {
@@ -60,11 +68,15 @@ export default function Setup() {
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.5,
+      base64: true,
     });
 
     if (!result.canceled) {
+      console.log(result);
+
       setValue("avatarUrl", result.assets[0].uri);
+      setAvatar(result.assets[0]);
     }
   };
 
