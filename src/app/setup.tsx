@@ -59,6 +59,7 @@ export default function Setup() {
       supabase.auth.refreshSession();
     },
     onError: (error) => {
+      console.error(error);
       Alert.alert(error.message);
     },
   });
