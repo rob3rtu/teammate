@@ -80,49 +80,21 @@ export default function EditProfile() {
 
     if (!result.canceled) {
       const img = result.assets[0];
-      const filePath = `${authenticatedAccount!.id}.png`;
+      const filePath = `${authenticatedAccount!.id}-${new Date()}.png`;
       const base64 = await FileSystem.readAsStringAsync(img.uri, {
         encoding: "base64",
       });
       const contentType = "image/png";
-      const { data, error } = await supabase.storage
+      await supabase.storage
         .from("avatars")
-        .update(filePath, decode(base64), { contentType, upsert: true });
-
-      console.log(data, error);
+        .update(filePath, decode(base64), { contentType });
 
       const { data: publicUrlData } = supabase.storage
         .from("avatars")
         .getPublicUrl(filePath);
 
-      console.log("✅✅✅ ", publicUrlData);
       setValue("avatarUrl", publicUrlData.publicUrl);
     }
-
-    // let result = await ImagePicker.launchImageLibraryAsync({
-    //   mediaTypes: ["images"],
-    //   allowsEditing: true,
-    //   aspect: [4, 3],
-    //   quality: 1,
-    //   base64: true,
-    // });
-
-    // if (!result.canceled) {
-    //   const base64 = `data:image/${result.assets[0].uri.substring(
-    //     result.assets[0].uri.lastIndexOf(".") + 1
-    //   )};base64,${result.assets[0].base64 ?? ""}`;
-
-    //   const filename = `${
-    //     authenticatedAccount?.id
-    //   }.${result.assets[0].uri.substring(
-    //     result.assets[0].uri.lastIndexOf(".") + 1
-    //   )}`;
-    //   const publicUrl = await uploadAvatar(base64, filename);
-
-    //   if (publicUrl) {
-
-    //   }
-    // }
   };
 
   return (
