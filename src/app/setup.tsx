@@ -17,7 +17,8 @@ import { AuthContext } from "./_layout";
 import * as ImagePicker from "expo-image-picker";
 import { profileSchema, ProfileSchemaType } from "@/types/profile";
 import LevelChip from "@/components/LevelChip";
-import { uploadAvatar } from "@/utils/utilityFunctions";
+import * as FileSystem from "expo-file-system";
+import { decode } from "base64-arraybuffer";
 
 export default function Setup() {
   const { authenticatedAccount } = useContext(AuthContext);
@@ -41,8 +42,6 @@ export default function Setup() {
 
   const handleFinishSetup = useMutation({
     mutationFn: async (formData: ProfileSchemaType) => {
-      console.log(formData);
-
       const { error } = await supabase
         .from("profiles")
         .update({ ...formData, setup: true })
@@ -54,35 +53,33 @@ export default function Setup() {
       supabase.auth.refreshSession();
     },
     onError: (error) => {
-      console.error(error);
       Alert.alert(error.message);
     },
   });
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
+    const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.5,
-      base64: true,
+      quality: 0.2,
     });
 
     if (!result.canceled) {
-      const base64 = `data:image/${result.assets[0].uri.substring(
-        result.assets[0].uri.lastIndexOf(".") + 1
-      )};base64,${result.assets[0].base64 ?? ""}`;
+      const img = result.assets[0];
+      const filePath = `${authenticatedAccount!.id}-${new Date()}.png`;
+      const base64 = await FileSystem.readAsStringAsync(img.uri, {
+        encoding: "base64",
+      });
+      const contentType = "image/png";
+      await supabase.storage
+        .from("avatars")
+        .update(filePath, decode(base64), { contentType });
 
-      const filename = `${
-        authenticatedAccount?.id
-      }.${result.assets[0].uri.substring(
-        result.assets[0].uri.lastIndexOf(".") + 1
-      )}`;
-      const publicUrl = await uploadAvatar(base64, filename);
+      const { data: publicUrlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
 
-      if (publicUrl) {
-        setValue("avatarUrl", publicUrl);
-      }
+      setValue("avatarUrl", publicUrlData.publicUrl);
     }
   };
 

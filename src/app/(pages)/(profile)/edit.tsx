@@ -48,8 +48,6 @@ export default function EditProfile() {
 
   const handleSaveChanges = useMutation({
     mutationFn: async (formData: ProfileSchemaType) => {
-      console.log(formData);
-
       const { error } = await supabase
         .from("profiles")
         .update(formData)
