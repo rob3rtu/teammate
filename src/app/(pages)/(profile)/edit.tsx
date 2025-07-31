@@ -1,29 +1,27 @@
 import { AuthContext } from "@/app/_layout";
+import LevelChip from "@/components/LevelChip";
 import PageView from "@/layouts/PageView";
 import { PlayerLevelEnum } from "@/types/auth";
 import { profileSchema, ProfileSchemaType } from "@/types/profile";
 import { supabase } from "@/utils/supabase";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import { useContext } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, Pressable, View, Image } from "react-native";
+import { Alert, Image, Pressable, View } from "react-native";
 import {
   Avatar,
   Button,
-  Chip,
   HelperText,
-  Surface,
   Text,
   TextInput,
-  TouchableRipple,
   useTheme,
 } from "react-native-paper";
-import * as ImagePicker from "expo-image-picker";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
-import LevelChip from "@/components/LevelChip";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import { decode } from "base64-arraybuffer";
 
 export default function EditProfile() {
   const { authenticatedAccount, setAuthenticatedAccount } =
@@ -50,10 +48,15 @@ export default function EditProfile() {
 
   const handleSaveChanges = useMutation({
     mutationFn: async (formData: ProfileSchemaType) => {
-      await supabase
+      console.log(formData);
+
+      const { error } = await supabase
         .from("profiles")
         .update(formData)
         .eq("id", authenticatedAccount?.id);
+
+      if (error) throw error;
+
       return formData;
     },
     onSuccess: (formData: ProfileSchemaType) => {
@@ -69,16 +72,57 @@ export default function EditProfile() {
   });
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
+    const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.2,
     });
 
     if (!result.canceled) {
-      setValue("avatarUrl", result.assets[0].uri);
+      const img = result.assets[0];
+      const filePath = `${authenticatedAccount!.id}.png`;
+      const base64 = await FileSystem.readAsStringAsync(img.uri, {
+        encoding: "base64",
+      });
+      const contentType = "image/png";
+      const { data, error } = await supabase.storage
+        .from("avatars")
+        .update(filePath, decode(base64), { contentType, upsert: true });
+
+      console.log(data, error);
+
+      const { data: publicUrlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      console.log("✅✅✅ ", publicUrlData);
+      setValue("avatarUrl", publicUrlData.publicUrl);
     }
+
+    // let result = await ImagePicker.launchImageLibraryAsync({
+    //   mediaTypes: ["images"],
+    //   allowsEditing: true,
+    //   aspect: [4, 3],
+    //   quality: 1,
+    //   base64: true,
+    // });
+
+    // if (!result.canceled) {
+    //   const base64 = `data:image/${result.assets[0].uri.substring(
+    //     result.assets[0].uri.lastIndexOf(".") + 1
+    //   )};base64,${result.assets[0].base64 ?? ""}`;
+
+    //   const filename = `${
+    //     authenticatedAccount?.id
+    //   }.${result.assets[0].uri.substring(
+    //     result.assets[0].uri.lastIndexOf(".") + 1
+    //   )}`;
+    //   const publicUrl = await uploadAvatar(base64, filename);
+
+    //   if (publicUrl) {
+
+    //   }
+    // }
   };
 
   return (

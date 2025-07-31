@@ -3,7 +3,7 @@ import { PlayerLevelEnum } from "@/types/auth";
 import { supabase } from "@/utils/supabase";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, Image, Pressable, View } from "react-native";
 import {
@@ -21,9 +21,6 @@ import { uploadAvatar } from "@/utils/utilityFunctions";
 
 export default function Setup() {
   const { authenticatedAccount } = useContext(AuthContext);
-  const [avatar, setAvatar] = useState<
-    ImagePicker.ImagePickerAsset | undefined
-  >(undefined);
   const {
     control,
     formState: { errors },
@@ -44,16 +41,14 @@ export default function Setup() {
 
   const handleFinishSetup = useMutation({
     mutationFn: async (formData: ProfileSchemaType) => {
-      let avatarPath: string = "";
+      console.log(formData);
 
-      if (avatar) {
-        avatarPath = await uploadAvatar(avatar, authenticatedAccount!.id);
-      }
-
-      await supabase
+      const { error } = await supabase
         .from("profiles")
-        .update({ ...formData, avatarUrl: avatarPath, setup: true })
+        .update({ ...formData, setup: true })
         .eq("id", authenticatedAccount?.id);
+
+      if (error) throw error;
     },
     onSuccess: () => {
       supabase.auth.refreshSession();
@@ -74,10 +69,20 @@ export default function Setup() {
     });
 
     if (!result.canceled) {
-      console.log(result);
+      const base64 = `data:image/${result.assets[0].uri.substring(
+        result.assets[0].uri.lastIndexOf(".") + 1
+      )};base64,${result.assets[0].base64 ?? ""}`;
 
-      setValue("avatarUrl", result.assets[0].uri);
-      setAvatar(result.assets[0]);
+      const filename = `${
+        authenticatedAccount?.id
+      }.${result.assets[0].uri.substring(
+        result.assets[0].uri.lastIndexOf(".") + 1
+      )}`;
+      const publicUrl = await uploadAvatar(base64, filename);
+
+      if (publicUrl) {
+        setValue("avatarUrl", publicUrl);
+      }
     }
   };
 

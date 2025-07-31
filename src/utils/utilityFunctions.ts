@@ -1,29 +1,37 @@
-import { ImagePickerAsset } from "expo-image-picker";
 import { supabase } from "./supabase";
-import { Buffer } from "buffer";
 
 export const capitalise = (v: string) =>
   v[0].toUpperCase() + v.slice(1).toLowerCase();
 
-export const uploadAvatar = async (
-  avatar: ImagePickerAsset | undefined,
-  id: string
-) => {
-  if (!avatar || !avatar.base64) return "";
+export const uploadAvatar = async (base64: string, filename: string) => {
+  const base64Data = base64.split(",")[1];
+  const contentType = base64.substring(5, base64.indexOf(";"));
 
-  const fileUri = avatar.uri;
-  const fileExt = fileUri.substring(fileUri.lastIndexOf(".") + 1);
-  const fileName = `${id}.${fileExt}`;
-  const contentType = avatar.mimeType || `image/${fileExt}`;
+  // Convert base64 to Uint8Array
+  const byteCharacters = atob(base64Data);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
 
   const { data, error } = await supabase.storage
     .from("avatars")
-    .upload(fileName, Buffer.from(avatar.base64, "base64"), {
+    .upload(filename, byteArray, {
       contentType,
       upsert: true,
     });
 
-  if (error) throw error;
+  console.log("⚠️⚠️⚠️⚠️⚠️⚠️⚠️"); // should now run
+  if (error) {
+    console.error("Upload error:", error);
+    return null;
+  }
 
-  return data?.path ?? "";
+  const { data: publicUrlData } = supabase.storage
+    .from("avatars")
+    .getPublicUrl(data.path);
+
+  console.log("✅✅✅ ", publicUrlData);
+  return publicUrlData.publicUrl;
 };
