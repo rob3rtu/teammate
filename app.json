@@ -31,6 +31,13 @@
     },
     "plugins": [
       [
+        "react-native-maps",
+        {
+          "iosGoogleMapsApiKey": "YOUR_KEY_HERE",
+          "androidGoogleMapsApiKey": "YOUR_KEY_HERE"
+        }
+      ],
+      [
         "expo-router",
         {
           "origin": "https://teammate.expo.app"
