@@ -16,9 +16,10 @@ export default function ProtectedLayout() {
         }}
       />
       <Tabs.Screen
-        name="(courts)/index"
+        name="(courts)"
         options={{
           title: "Courts",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="map-search-outline"
