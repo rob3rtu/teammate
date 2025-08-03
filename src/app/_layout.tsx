@@ -39,7 +39,7 @@ export default function RootLayout() {
       setSession(session);
 
       supabase.auth.onAuthStateChange((_event, session) => {
-        setIsAppReady(false);
+        setIsAppReady(true);
         setSession(session);
       });
     };
